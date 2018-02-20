@@ -1,8 +1,8 @@
 <?php 
 
-class Model_Canciones extends Orm\Model
+class Model_Noticias extends Orm\Model
 {
-    protected static $_table_name = 'canciones';
+    protected static $_table_name = 'noticias';
 
     protected static $_primary_key = array('id');
     protected static $_properties = array(
@@ -10,15 +10,13 @@ class Model_Canciones extends Orm\Model
         'titulo' => array(
             'data_type' => 'varchar'   
         ),
-        'artista' => array(
+        'descripcion' => array(
             'data_type' => 'varchar'   
         ),
-        'url' => array(
-            'data_type' => 'varchar'   
-        ),
-        'reproducciones' => array(
+        
+        'id_usuario' => array(
             'data_type' => 'int'   
-        ),
+        )
         
     );
 }

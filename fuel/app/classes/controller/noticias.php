@@ -2,7 +2,7 @@
 
 use \Firebase\JWT\JWT;
 
-class Controller_Listas extends Controller_Rest
+class Controller_Noticias extends Controller_Rest
 {
     private $key = "juf3dhu3hufdchv3xui3ucxj";
    
@@ -51,7 +51,7 @@ class Controller_Listas extends Controller_Rest
 
                 $json = $this->response(array(
                     'code' => 400,
-                    'message' => 'Solo los usuario pueden crear listas modificables',
+                    'message' => 'Solo los usuario pueden crear noticias',
                     'data' => []
                 ));
                 return $json;
@@ -61,7 +61,7 @@ class Controller_Listas extends Controller_Rest
             {    
 
 
-                if (  ! isset($_POST['titulo'])) 
+                if (  ! isset($_POST['titulo']) || ! isset($_POST['descripcion'])) 
                 {
                     $json = $this->response(array(
                         'code' => 400,
@@ -88,10 +88,10 @@ class Controller_Listas extends Controller_Rest
 
                 $input = $_POST;
                 
-                    $listas = new Model_Listas();
-                    $listas->editable= 1;
-                    $listas->id_usuario = $dataJwtUser->id;
-                    $listas->titulo= $input['titulo'];
+                    $noticias = new Model_Noticias();
+                    $noticias->descripcion = $input['descripcion'];
+                    $noticias->id_usuario = $dataJwtUser->id;
+                    $noticias->titulo= $input['titulo'];
                     
                    
 
@@ -100,7 +100,7 @@ class Controller_Listas extends Controller_Rest
                 
                 
                
-                    if ($listas->id_usuario == "" || $listas->titulo == ""   )
+                    if ($noticias->descripcion == "" || $noticias->titulo == ""   )
                     {
                         $json = $this->response(array(
                             'code' => 400,
@@ -112,14 +112,14 @@ class Controller_Listas extends Controller_Rest
                     {
 
 
-                        $listas->save();
+                        $noticias->save();
                         
                         
 
                         $json = $this->response(array(
                             'code' => 200,
-                            'message' => 'Cancion creada correctamente',
-                            'data' => $listas
+                            'message' => 'Noticia creada correctamente',
+                            'data' => $noticias
                         ));
 
                         return $json;
@@ -146,7 +146,7 @@ class Controller_Listas extends Controller_Rest
         }        
     }
 
-    public function get_listas()
+    public function get_misNoticias()
     {
         try
             {
@@ -180,7 +180,7 @@ class Controller_Listas extends Controller_Rest
 
 
 
-        $listas = Model_Listas::find('all', array(
+        $noticias = Model_Noticias::find('all', array(
                         'where' => array(
                             array('id_usuario', $dataJwtUser->id),
                             
@@ -190,8 +190,8 @@ class Controller_Listas extends Controller_Rest
 
         $json = $this->response(array(
             'code' => 200,
-            'message' => 'Conjunto de listas',
-            'data' => $listas
+            'message' => 'Conjunto de noticias',
+            'data' => $noticias
         ));
 
         return $json;
@@ -199,7 +199,7 @@ class Controller_Listas extends Controller_Rest
         //return $this->response(Arr::reindex($users));
 
     }
-    public function post_modifyList()
+    public function get_noticias()
     {
         try
             {
@@ -230,7 +230,54 @@ class Controller_Listas extends Controller_Rest
             return $json;
                
         }
-        if (  ! isset($_POST['titulo']) || ! isset($_POST['id'])) 
+
+
+
+        $noticias = Model_Noticias::find('all');
+
+        $json = $this->response(array(
+            'code' => 200,
+            'message' => 'Conjunto de noticias',
+            'data' => $noticias
+        ));
+
+        return $json;
+
+        //return $this->response(Arr::reindex($users));
+
+    }
+    public function post_modify()
+    {
+        try
+            {
+                $headers = apache_request_headers();
+                $token = $headers['Authorization'];
+                $dataJwtUser = JWT::decode($token, $this->key, array('HS256'));
+
+        
+      
+
+                $users = Model_Usuarios::find('all', array(
+                    'where' => array(
+                        array('id', $dataJwtUser->id),
+                        array('username', $dataJwtUser->username),
+                        array('password', $dataJwtUser->password)
+               
+                    )
+                 ));
+
+            }    
+        catch (Exception $e)
+        {
+            $json = $this->response(array(
+                'code' => 500,
+                'message' => $e->getMessage(),
+                'data' => []
+            ));
+            return $json;
+               
+        }
+        if (  ! isset($_POST['titulo_antiguo']) || ! isset($_POST['titulo']) || ! isset($_POST['descripcion'])) 
                 {
                     $json = $this->response(array(
                         'code' => 400,
@@ -245,25 +292,74 @@ class Controller_Listas extends Controller_Rest
 
 
 
-        $listas = Model_Listas::find('all', array(
+        $noticias = Model_Noticias::find('all', array(
                         'where' => array(
                             array('id_usuario', $dataJwtUser->id),
-                            array('id', $input['id']),
+                            array('titulo', $input['titulo_antiguo']),
                             
                    
                         )
                      ));
-      
-        foreach ($listas as $key => $lista) 
+
+        if(empty($noticias))
         {
-            $lista->titulo = $input['titulo'];
-            $lista->save();
+            $json = $this->response(array(
+                        'code' => 400,
+                        'message' => 'Noticia no encontrada',
+                        'data' => []
+                    ));
+
+                    return $json;
         }
+
+        if($input['titulo'] == '' && $input['descripcion'] == '')
+        {
+            $json = $this->response(array(
+                        'code' => 400,
+                        'message' => 'No puedes dejar los dos campos vacios',
+                        'data' => []
+                    ));
+
+                    return $json;
+
+
+        }
+        elseif ($input['titulo'] == '')
+        {
+            foreach ($noticias as $key => $noticia) 
+            {
+               
+                $noticia->descripcion= $input['descripcion'];
+                $noticia->save();
+            }
+
+        }
+        elseif ( $input['descripcion'] == '')
+        {
+            foreach ($noticias as $key => $noticia) 
+            {
+                $noticia->titulo= $input['titulo'];
+               
+                $noticia->save();
+            }
+
+        }
+        else{
+            foreach ($noticias as $key => $noticia) 
+            {
+                $noticia->titulo = $input['titulo'];
+                $noticia->descripcion = $input['descripcion'];
+                $noticia->save();
+            }
+
+        }
+      
+        
 
         $json = $this->response(array(
             'code' => 200,
-            'message' => 'Conjunto de listas',
-            'data' => $listas
+            'message' => 'Noticia modificada',
+            'data' => $noticias
         ));
 
         return $json;
@@ -303,7 +399,7 @@ class Controller_Listas extends Controller_Rest
             return $json;
                
         }
-        if (  ! isset($_POST['id'])) 
+        if (  ! isset($_POST['titulo'])) 
                 {
                     $json = $this->response(array(
                         'code' => 400,
@@ -319,21 +415,21 @@ class Controller_Listas extends Controller_Rest
 
 
 
-        $listas = Model_Listas::find('all', array(
+        $noticias = Model_Noticias::find('all', array(
                         'where' => array(
                             array('id_usuario', $dataJwtUser->id),
-                            array('id', $input['id']),
+                            array('titulo', $input['titulo']),
                             
                    
                         )
                      ));
-        if (! empty($listas))
+        if (! empty($noticias))
         {
-            foreach ($listas as $key => $lista) {
-            $borrar = $lista;
+            foreach ($noticias as $key => $noticia) {
+            $borrar = $noticia;
             }
 
-            $lista->delete();
+            $noticia->delete();
           
 
             $json = $this->response(array(
@@ -350,7 +446,7 @@ class Controller_Listas extends Controller_Rest
         {
             $json = $this->response(array(
                 'code' => 400,
-                'message' => 'Id no encontrado',
+                'message' => 'Titulo no encontrado',
                 'data' => []
             ));
 
@@ -359,6 +455,57 @@ class Controller_Listas extends Controller_Rest
 
         }
         
+    }
+
+    public function get_noticiasCercania()
+    {
+        try
+            {
+                $headers = apache_request_headers();
+                $token = $headers['Authorization'];
+                $dataJwtUser = JWT::decode($token, $this->key, array('HS256'));
+
+        
+      
+
+                $users = Model_Usuarios::find('all', array(
+                    'where' => array(
+                        array('id', $dataJwtUser->id),
+                        array('username', $dataJwtUser->username),
+                        array('password', $dataJwtUser->password)
+               
+                    )
+                 ));
+
+            }    
+        catch (Exception $e)
+        {
+            $json = $this->response(array(
+                'code' => 500,
+                'message' => $e->getMessage(),
+                'data' => []
+            ));
+            return $json;
+               
+        }
+
+
+        $noticias = Model_Noticias::find('all');
+        foreach ($noticias as $key => $noticia) {
+            # code...
+        }
+        
+
+        $json = $this->response(array(
+            'code' => 200,
+            'message' => 'Conjunto de noticias',
+            'data' => $noticias
+        ));
+
+        return $json;
+
+        //return $this->response(Arr::reindex($users));
+
     }
     
 

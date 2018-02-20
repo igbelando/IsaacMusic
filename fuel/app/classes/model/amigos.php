@@ -1,13 +1,13 @@
 <?php 
 
-class Model_Anyadir extends Orm\Model
+class Model_Amigos extends Orm\Model
 {
-    protected static $_table_name = 'listas_contienen_canciones';
+    protected static $_table_name = 'amigos';
 
-    protected static $_primary_key = array('id_lista','id_cancion');
+    protected static $_primary_key = array('id_usuario_seguidor','id_usuario_seguido');
     protected static $_properties = array(
-        'id_lista',
-        'id_cancion' // both validation & typing observers will ignore the PK
+        'id_usuario_seguidor',
+        'id_usuario_seguido' // both validation & typing observers will ignore the PK
        
         
     );
