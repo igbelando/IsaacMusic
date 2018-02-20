@@ -146,24 +146,7 @@ class Controller_Canciones extends Controller_Rest
         }        
     }
 
-    public function get_mostViewed()
-    {
-         $canciones= Model_Canciones::find('all', array(
-          
-            'order_by' => array('reproducciones' => 'desc')
-        ));
-
-        $json = $this->response(array(
-            'code' => 200,
-            'message' => 'Esta es la lista de canciones mas escuchadas',
-            'data' => $canciones
-        ));
-
-        return $json;
-
-        //return $this->response(Arr::reindex($users));
-
-    }
+    
     public function get_reproduceSong()
     {
         try
