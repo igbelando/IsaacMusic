@@ -178,15 +178,30 @@ class Controller_Listas extends Controller_Rest
                
         }
 
+        $input = $_GET;
+        $decena = $input['decena_lista']-1;
+        if($input['decena_lista'] == '')
+        {
+           $json = $this->response(array(
+                'code' => 400,
+                'message' => 'Introduce una decena',
+                'data' => []
+            ));
+            return $json; 
+        }
+        if($input['decena_lista'] <= 0)
+        {
+           $json = $this->response(array(
+                'code' => 400,
+                'message' => 'La decena minima es 1',
+                'data' => []
+            ));
+            return $json; 
+        }
 
 
-        $listas = Model_Listas::find('all', array(
-                        'where' => array(
-                            array('id_usuario', $dataJwtUser->id),
-                            
-                   
-                        )
-                     ));
+
+       $listas = Model_Listas::query()->where('id_usuario', $dataJwtUser->id)->offset( $decena * 10)->limit(10)->get();
 
         $json = $this->response(array(
             'code' => 200,

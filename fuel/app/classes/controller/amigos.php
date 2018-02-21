@@ -243,17 +243,31 @@ class Controller_Amigos extends Controller_Rest
         }
         $input = $_GET;
 
+        $decena = $input['decena_amigos']-1;
+        if($input['decena_amigos'] == '')
+        {
+           $json = $this->response(array(
+                'code' => 400,
+                'message' => 'Introduce una decena',
+                'data' => []
+            ));
+            return $json; 
+        }
+        if($input['decena_amigos'] <= 0)
+        {
+           $json = $this->response(array(
+                'code' => 400,
+                'message' => 'La decena minima es 1',
+                'data' => []
+            ));
+            return $json; 
+        }
 
-        $amigos = Model_Amigos::find('all', array(
-                        'where' => array(
-                            array('id_usuario_seguidor', $dataJwtUser->id),
 
 
-                            
-                            
-                   
-                        )
-                     ));
+       $amigos = Model_Amigos::query()->where('id_usuario_seguidor', $dataJwtUser->id)->offset( $decena * 10)->limit(10)->get();
+
+
         if (empty($amigos))
         {
             $json = $this->response(array(
@@ -277,6 +291,98 @@ class Controller_Amigos extends Controller_Rest
                 $json = $this->response(array(
                     'code' => 200,
                     'message' => 'Lista de amigos',
+                    'data' => $añadido
+                ));
+
+                return $json;
+            
+        }
+
+        //return $this->response(Arr::reindex($users));
+
+    }
+
+     public function get_seguidores()
+    {
+        try
+            {
+                $headers = apache_request_headers();
+                $token = $headers['Authorization'];
+                $dataJwtUser = JWT::decode($token, $this->key, array('HS256'));
+
+        
+      
+
+                $users = Model_Usuarios::find('all', array(
+                    'where' => array(
+                        array('id', $dataJwtUser->id),
+                        array('username', $dataJwtUser->username),
+                        array('password', $dataJwtUser->password)
+               
+                    )
+                 ));
+
+            }    
+        catch (Exception $e)
+        {
+            $json = $this->response(array(
+                'code' => 500,
+                'message' => $e->getMessage(),
+                'data' => []
+            ));
+            return $json;
+               
+        }
+        $input = $_GET;
+
+        $decena = $input['decena_amigos']-1;
+        if($input['decena_amigos'] == '')
+        {
+           $json = $this->response(array(
+                'code' => 400,
+                'message' => 'Introduce una decena',
+                'data' => []
+            ));
+            return $json; 
+        }
+        if($input['decena_amigos'] <= 0)
+        {
+           $json = $this->response(array(
+                'code' => 400,
+                'message' => 'La decena minima es 1',
+                'data' => []
+            ));
+            return $json; 
+        }
+
+
+
+       $amigos = Model_Amigos::query()->where('id_usuario_seguido', $dataJwtUser->id)->offset( $decena * 10)->limit(10)->get();
+
+
+        if (empty($amigos))
+        {
+            $json = $this->response(array(
+                'code' => 400,
+                'message' => 'No tienes amigos',
+                'data' => []
+            ));
+            return $json;
+
+        }
+        else
+        {
+           
+
+
+                foreach ($amigos as $key => $amigo) {
+                    $añadido[] = $amigo;
+                    # code...
+                }
+
+                $json = $this->response(array(
+                    'code' => 200,
+                    'message' => 'Lista de seguidores',
                     'data' => $añadido
                 ));
 

@@ -180,13 +180,31 @@ class Controller_Noticias extends Controller_Rest
 
 
 
-        $noticias = Model_Noticias::find('all', array(
-                        'where' => array(
-                            array('id_usuario', $dataJwtUser->id),
-                            
-                   
-                        )
-                     ));
+      $input = $_GET;
+        $decena = $input['decena_noticias']-1;
+        if($input['decena_noticias'] == '')
+        {
+           $json = $this->response(array(
+                'code' => 400,
+                'message' => 'Introduce una decena',
+                'data' => []
+            ));
+            return $json; 
+        }
+        if($input['decena_noticias'] <= 0)
+        {
+           $json = $this->response(array(
+                'code' => 400,
+                'message' => 'La decena minima es 1',
+                'data' => []
+            ));
+            return $json; 
+        }
+
+
+
+       $noticias = Model_Noticias::query()->where('id_usuario', $dataJwtUser->id)->offset( $decena * 10)->limit(10)->get();
+
 
         $json = $this->response(array(
             'code' => 200,
@@ -233,7 +251,32 @@ class Controller_Noticias extends Controller_Rest
 
 
 
-        $noticias = Model_Noticias::find('all');
+       $input = $_GET;
+        $decena = $input['decena_noticias']-1;
+        if($input['decena_noticias'] == '')
+        {
+           $json = $this->response(array(
+                'code' => 400,
+                'message' => 'Introduce una decena',
+                'data' => []
+            ));
+            return $json; 
+        }
+        if($input['decena_noticias'] <= 0)
+        {
+           $json = $this->response(array(
+                'code' => 400,
+                'message' => 'La decena minima es 1',
+                'data' => []
+            ));
+            return $json; 
+        }
+
+
+
+       $noticias = Model_Noticias::query()->offset( $decena * 10)->limit(10)->get();
+
+
 
         $json = $this->response(array(
             'code' => 200,
@@ -457,7 +500,9 @@ class Controller_Noticias extends Controller_Rest
         
     }
 
-    public function get_noticiasCercania()
+    
+
+     public function get_noticiasCercanas()
     {
         try
             {
@@ -488,18 +533,70 @@ class Controller_Noticias extends Controller_Rest
             return $json;
                
         }
+        $input = $_GET;
 
-
-        $noticias = Model_Noticias::find('all');
+         $decena = $input['decena_noticias']-1;
+        if($input['decena_noticias'] == '')
+        {
+           $json = $this->response(array(
+                'code' => 400,
+                'message' => 'Introduce una decena',
+                'data' => []
+            ));
+            return $json; 
+        }
+        if($input['decena_noticias'] <= 0)
+        {
+           $json = $this->response(array(
+                'code' => 400,
+                'message' => 'La decena minima es 1',
+                'data' => []
+            ));
+            return $json; 
+        }
+        $noticias = Model_Noticias::query()->get();
         foreach ($noticias as $key => $noticia) {
+
+                $users = Model_Usuarios::query()->where('id',$noticia->id_usuario)->get();
+           foreach ($users as $key => $user) 
+           {
+
+
+               # code...
+                if(abs($dataJwtUser->coordenada_X - $user->coordenada_X)<= 30.0 && abs($dataJwtUser->coordenada_Y - $user->coordenada_Y)<= 30.0 && $dataJwtUser->id != $user->id)      
+
+                {
+
+
+                    $cercanos[] = $noticia;
+                }
+
+           }
             # code...
         }
+        if(empty($cercanos))
+        {
+            $json = $this->response(array(
+                'code' => 400,
+                'message' => 'No hay noticias encontradas',
+                'data' => []
+            ));
+            return $json; 
+
+        }
+
+
+
+       
+       $salida = array_slice($cercanos, $decena*10,($decena+1)*10);
         
+
 
         $json = $this->response(array(
             'code' => 200,
-            'message' => 'Conjunto de noticias',
-            'data' => $noticias
+            'message' => 'Esta es la lista de noticias de usuarios cercanos',
+            'data' => $salida
+
         ));
 
         return $json;
