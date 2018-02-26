@@ -4,7 +4,7 @@ use \Firebase\JWT\JWT;
 
 class Controller_Roles extends Controller_Rest
 {
-    private $key = "juf3dhu3hufdchv3xui3ucxj";
+    private $key = "jnf4lcf4hg3ghg53vgvkx24vxg";
 
     private $getEmail = "";
 

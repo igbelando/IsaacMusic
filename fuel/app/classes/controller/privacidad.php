@@ -4,7 +4,8 @@ use \Firebase\JWT\JWT;
 
 class Controller_Privacidad extends Controller_Rest
 {
-    private $key = "juf3dhu3hufdchv3xui3ucxj";
+    private $key = "jnf4lcf4hg3ghg53vgvkx24vxg";
+    
     public function post_privacidadAmigos()
     {
         try
@@ -12,9 +13,6 @@ class Controller_Privacidad extends Controller_Rest
                 $headers = apache_request_headers();
                 $token = $headers['Authorization'];
                 $dataJwtUser = JWT::decode($token, $this->key, array('HS256'));
-
-        
-      
 
                 $users = Model_Usuarios::find('all', array(
                     'where' => array(

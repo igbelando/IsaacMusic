@@ -2,13 +2,13 @@
 
 namespace Fuel\Migrations;
 
-class Roles
+class roles
 {
     function up()
     {
         \DBUtil::create_table('roles', array(
             'id' => array('type' => 'int', 'constraint' => 11, 'auto_increment' => true),
-            'tipo' => array('type' => 'varchar', 'constraint' => 100),
+            'type' => array('type' => 'varchar', 'constraint' => 100),
         ), array('id'));
     }
 

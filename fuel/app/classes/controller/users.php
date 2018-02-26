@@ -2,137 +2,108 @@
 
 use \Firebase\JWT\JWT;
 
-class Controller_Usuarios extends Controller_Rest
+class Controller_Users extends Controller_Rest
 {
-    private $key = "juf3dhu3hufdchv3xui3ucxj";
+    private $key = "jnf4lcf4hg3ghg53vgvkx24vxg";
 
     private $getEmail = "";
 
                                     //Crear usuario
     public function post_create()
     {
-
-     
         try {
 
-               $roles = Model_Usuarios::find('all', array(
-                    'where' => array(
-                        array('id_rol', 1),
-                       
-                    )          
-                ));
+           $roles = Model_Users::find('all', array(
+                'where' => array(
+                    array('id_rol', 1),
+                   
+                )          
+            ));
 
-                if(empty($roles))
+            if(empty($roles))
+            {
+                $json = $this->response(array(
+                'code' => 400,
+                'message' => 'No se puede usar la app hasta que haya minimo un administrador',
+                'data' => []
+            ));
+
+            return $json;
+
+            }
+            else
+            {
+                if ( ! isset($_POST['username']) && ! isset($_POST['password'])&& ! isset($_POST['repeatPassword']) && ! isset($_POST['email'])) 
                 {
                     $json = $this->response(array(
-                    'code' => 400,
-                    'message' => 'No se puede usar la app hasta que haya minimo un administrador',
-                    'data' => []
-                ));
+                        'code' => 400,
+                        'message' => 'Error en las credenciales, prueba otra vez',
+                        'data' => []
+                    ));
 
-                return $json;
-
+                    return $json;
                 }
+
+                $input = $_POST;
+                if ($input['password'] != $input['repeatPassword'])
+                {
+                    $json = $this->response(array(
+                        'code' => 400,
+                        'message' => 'password y repeatPassword han de coincidir',
+                        'data' => []
+                    ));
+
+                    
+                }
+
+                /*$password = ['password' => $input['password']];
+                $dataJwtPassword = JWT::decode($password, $this->key);*/
+
                 else
                 {
-                    if ( ! isset($_POST['username']) && ! isset($_POST['password'])&& ! isset($_POST['repeatPassword']) && ! isset($_POST['email'])) 
+                    $user = new Model_Users();
+                    $user->username = $input['username'];
+                    $user->password = $input['password'];
+                    $user->email = $input['email'];
+                    $user->coordinate_X = 0.00;
+                    $user->coordinate_Y = 0.00;
+                    $user->id_rol = 2;
+
+                    if ($user->username == "" || $user->email == "" || $user->password == "")
                     {
                         $json = $this->response(array(
                             'code' => 400,
-                            'message' => 'Error en las credenciales, prueba otra vez',
+                            'message' => 'Se necesita introducir todos los parametros',
                             'data' => []
                         ));
-
-                        return $json;
                     }
-
-                    /*if (strlen($_POST['password']) < 6 || strlen($_POST['password']) >12){
-                        $json = $this->response(array(
-                            'code' => 400,
-                            'message' => 'Contraseña: entre 6 y 12 caracteres',
-                            'data' => []
-                        ));
-
-                        return $json;
-
-                    }*/
-
-
-                  
-
-                    $input = $_POST;
-                    if ($input['password'] != $input['repeatPassword'])
-                    {
-                        $json = $this->response(array(
-                            'code' => 400,
-                            'message' => 'password y repeatPassword han de coincidir',
-                            'data' => []
-                        ));
-
-                        
-                    }
-
-
-
-                    /*$password = ['password' => $input['password']];
-                    $dataJwtPassword = JWT::decode($password, $this->key);*/
-
-                    
-                    
                     else
                     {
-                        $user = new Model_Usuarios();
-                        $user->username = $input['username'];
-                        $user->password = $input['password'];
-                        $user->email = $input['email'];
-                        $user->coordenada_X = 0.00;
-                        $user->coordenada_Y = 0.00;
-                        $user->id_rol = 2;
 
+                        $user->save();
+                        $dataToken = array(
+                                "id" => $user->id,
+                                "username" => $user->username,
+                                "password" => $user->password,
+                                "email" => $user->email,
+                                "id_rol" => $user->id_rol,
+                                "coordinate_X"=>$user->coordinate_X,
+                                "coordinate_Y"=>$user->coordinate_Y
+                            );
 
+                        $token = JWT::encode($dataToken, $this->key);
+                        $this->privacityDefault($user->id);
 
-                        
-                    
-                    
-                   
-                        if ($user->username == "" || $user->email == "" || $user->password == "")
-                        {
-                            $json = $this->response(array(
-                                'code' => 400,
-                                'message' => 'Se necesita introducir todos los parametros',
-                                'data' => []
-                            ));
-                        }
-                        else
-                        {
+                        $json = $this->response(array(
+                            'code' => 200,
+                            'message' => 'Usuario creado correctamente',
+                            'data' => $token
+                        ));
 
-
-                            $user->save();
-                        
-                            $dataToken = array(
-                                    "id" => $user->id,
-                                    "username" => $user->username,
-                                    "password" => $user->password,
-                                    "email" => $user->email,
-                                    "id_rol" => $user->id_rol,
-                                    "coordenada_X"=>$user->coordenada_X,
-                                    "coordenada_Y"=>$user->coordenada_Y
-                                );
-
-                            $token = JWT::encode($dataToken, $this->key);
-                            $this->privacityDefault($user->id);
-
-                            $json = $this->response(array(
-                                'code' => 200,
-                                'message' => 'Usuario creado correctamente',
-                                'data' => $token
-                            ));
-
-                            return $json;
-                        }
+                        return $json;
                     }
                 }
-            
+            }
         } 
         catch (Exception $e) 
         {
@@ -168,8 +139,8 @@ class Controller_Usuarios extends Controller_Rest
     {
         $input = $_GET;
 
-    	 $decena = $input['decena_usuarios']-1;
-        if($input['decena_usuarios'] == '')
+    	 $tens = $input['tens_users']-1;
+        if($input['tens_users'] == '')
         {
            $json = $this->response(array(
                 'code' => 400,
@@ -178,7 +149,7 @@ class Controller_Usuarios extends Controller_Rest
             ));
             return $json; 
         }
-        if($input['decena_usuarios'] <= 0)
+        if($input['tens_users'] <= 0)
         {
            $json = $this->response(array(
                 'code' => 400,
@@ -188,10 +159,7 @@ class Controller_Usuarios extends Controller_Rest
             return $json; 
         }
 
-
-
-       $users = Model_Usuarios::query()->where('id_rol',2)->offset( $decena * 10)->limit(10)->get();
-
+        $users = Model_Users::query()->where('id_rol',2)->offset( $decena * 10)->limit(10)->get();
 
         $json = $this->response(array(
             'code' => 200,
@@ -205,18 +173,15 @@ class Controller_Usuarios extends Controller_Rest
     	//return $this->response(Arr::reindex($users));
 
     }
-    public function get_usersCercanos()
+    public function get_closeUsers()
     {
-        try
-            {
+        try{
+
                 $headers = apache_request_headers();
                 $token = $headers['Authorization'];
                 $dataJwtUser = JWT::decode($token, $this->key, array('HS256'));
 
-        
-      
-
-                $users = Model_Usuarios::find('all', array(
+                $users = Model_Users::find('all', array(
                     'where' => array(
                         array('id', $dataJwtUser->id),
                         array('username', $dataJwtUser->username),
@@ -238,8 +203,8 @@ class Controller_Usuarios extends Controller_Rest
         }
         $input = $_GET;
 
-         $decena = $input['decena_usuarios']-1;
-        if($input['decena_usuarios'] == '')
+         $tens = $input['tens_users']-1;
+        if($input['tens_users'] == '')
         {
            $json = $this->response(array(
                 'code' => 400,
@@ -248,7 +213,7 @@ class Controller_Usuarios extends Controller_Rest
             ));
             return $json; 
         }
-        if($input['decena_usuarios'] <= 0)
+        if($input['tens_users'] <= 0)
         {
            $json = $this->response(array(
                 'code' => 400,
@@ -258,20 +223,18 @@ class Controller_Usuarios extends Controller_Rest
             return $json; 
         }
 
-
-
-       $users = Model_Usuarios::query()->where('id_rol',2)->get();
+       $users = Model_Users::query()->where('id_rol',2)->get();
        foreach ($users as $key => $user) {
            # code...
-        if(abs($dataJwtUser->coordenada_X - $user->coordenada_X)<= 30.0 && abs($dataJwtUser->coordenada_Y - $user->coordenada_Y)<= 30.0 && $dataJwtUser->id != $user->id)      
+        if(abs($dataJwtUser->coordinate_X - $user->coordinate_X)<= 30.0 && abs($dataJwtUser->coordinate_Y - $user->coordinate_Y)<= 30.0 && $dataJwtUser->id != $user->id)      
 
         {
 
-            $cercanos[] = $user;
+            $close[] = $user;
         }
 
        }
-       if(empty($cercanos))
+       if(empty($close))
         {
             $json = $this->response(array(
                 'code' => 400,
@@ -281,14 +244,12 @@ class Controller_Usuarios extends Controller_Rest
             return $json; 
 
         }
-       $salida = array_slice($cercanos, $decena*10,($decena+1)*10);
+       $exit = array_slice($close, $tens*10,($tens+1)*10);
         
-
-
         $json = $this->response(array(
             'code' => 200,
             'message' => 'Esta es la lista de usuarios cercanos',
-            'data' => $salida
+            'data' => $exit
 
         ));
 
@@ -297,6 +258,7 @@ class Controller_Usuarios extends Controller_Rest
         //return $this->response(Arr::reindex($users));
 
     }
+
     /*public function get_user()
     {
 
@@ -323,24 +285,15 @@ class Controller_Usuarios extends Controller_Rest
     private function privacityDefault($id)
     {
        
-
-
-        $privacidad= new Model_Privacidad();
-        $privacidad->id_usuario = $id;
-        $privacidad->perfil = 1;
-        $privacidad->amigos = 1;
-        $privacidad->listas = 1;
-        $privacidad->notificaciones = 1;
-        $privacidad->ubicacion =1;
-        $privacidad->save();
+        $privacity= new Model_Privacity();
+        $privacity->id_user = $id;
+        $privacity->profile = 1;
+        $privacity->friends = 1;
+        $privacity->lists = 1;
+        $privacity->notifications = 1;
+        $privacity->ubication =1;
+        $privacity->save();
        
-        
-
-
-
-
-
-
     }  
 
 
@@ -364,8 +317,6 @@ class Controller_Usuarios extends Controller_Rest
     {
     try {
 
-     
-
             if ( empty($_GET['username']) || empty($_GET['password']))
             {
                 return $this->response(array(
@@ -381,25 +332,16 @@ class Controller_Usuarios extends Controller_Rest
           
            // $passwordDecode = JWT::decode($password, $this->key, array('HS256'));
 
-            
-
-            $users = Model_Usuarios::find('all', array(
+            $users = Model_Users::find('all', array(
                         'where' => array(
                             array('username', $input['username']),
                             array('password', $input['password']),
                         )          
                     ));
 
-            
-
-           
-
-            
-            
             if ( ! empty($users) )
             {
                 
-
                 foreach ($users as $key => $value)
                 {
                     $id = $users[$key]->id;
@@ -429,8 +371,8 @@ class Controller_Usuarios extends Controller_Rest
                 "username" => $name,
                 "password" => $password,
                 "id_rol" => $id_rol,
-                "coordenada_X"=>$user->coordenada_X,
-                "coordenada_Y"=>$user->coordenada_Y
+                "coordinate_X"=>$user->coordinate_X,
+                "coordinate_Y"=>$user->coordinate_Y
                 );
 
             $token = JWT::encode($dataToken, $this->key);
@@ -468,7 +410,7 @@ class Controller_Usuarios extends Controller_Rest
             }
             // Validación de e-mail
             $input = $_GET;
-            $users = Model_Usuarios::find('all', array(
+            $users = Model_Users::find('all', array(
                 'where' => array(
                     array('email', $input['email'])
                 )
@@ -526,8 +468,6 @@ class Controller_Usuarios extends Controller_Rest
                 {
                     $token = $header['Authorization'];
                     $dataJwtUser = JWT::decode($token, $this->key, array('HS256'));
-
-
                 }
 
             if (empty($_POST['password'])) 
@@ -552,7 +492,7 @@ class Controller_Usuarios extends Controller_Rest
                 }
 
                 $input = $_POST;
-                $user = Model_Usuarios::find($dataJwtUser->id);
+                $user = Model_Users::find($dataJwtUser->id);
                 $user->password = $input['password'];
                
                 $user->save();
@@ -588,7 +528,7 @@ class Controller_Usuarios extends Controller_Rest
         
       
 
-                $users = Model_Usuarios::find('all', array(
+                $users = Model_Users::find('all', array(
                     'where' => array(
                         array('id', $dataJwtUser->id),
                         array('username', $dataJwtUser->username),
@@ -608,20 +548,15 @@ class Controller_Usuarios extends Controller_Rest
                 return $json;
                    
             }
-
-            
-
                     $input = $_POST;
 
-                    $users = Model_Usuarios::find('all', array(
+                    $users = Model_Users::find('all', array(
                             'where' => array(
                                 array('id', $dataJwtUser->id)
                             )
                      ));
 
-                    
-
-                    $user = Model_Usuarios::find($dataJwtUser->id);
+                    $user = Model_Users::find($dataJwtUser->id);
                     if(empty($user)){
                         $json = $this->response(array(
                             'code' => 400,
@@ -637,30 +572,30 @@ class Controller_Usuarios extends Controller_Rest
                     {  $user->password = $input['password'];
 
                     }
-                     if($input['coordenada_Y'] != '')
+                     if($input['coordinate_Y'] != '')
                     {
 
-                    $user->coordenada_Y = $input['coordenada_Y'];
-
-                    }
-                     if($input['coordenada_X'] != '')
-                    {
-                        $user->coordenada_X = $input['coordenada_X'];
+                    $user->coordinate_Y = $input['coordinate_Y'];
 
                     }
-                     if($input['cumple'] != '')
+                     if($input['coordinate_X'] != '')
                     {
-                         $user->cumple = $input['cumple'];
+                        $user->coordinate_X = $input['coordinate_X'];
 
                     }
-                     if($input['ciudad'] != '')
+                     if($input['birthday'] != '')
                     {
-                         $user->ciudad = $input['ciudad'];
+                         $user->birthday = $input['birthday'];
 
                     }
-                    if($input['descripcion'] != '')
+                     if($input['city'] != '')
                     {
-                         $user->descripcion = $input['descripcion'];
+                         $user->city = $input['city'];
+
+                    }
+                    if($input['description'] != '')
+                    {
+                         $user->description = $input['description'];
 
                     }
                   
@@ -670,15 +605,6 @@ class Controller_Usuarios extends Controller_Rest
 
                     }
                      
-                    
-                   
-                   
-                    
-                   
-                   
-                    
-                    
-               
                     $user->save();
                                 
                     $json = $this->response(array(
@@ -733,13 +659,11 @@ class Controller_Usuarios extends Controller_Rest
 
             foreach(Upload::get_files() as $file)
             {
-                $user = Model_Usuarios::find($dataJwtUser->id);
-                $user->foto_perfil = 'http://' . $_SERVER['SERVER_NAME'] . '/appmusicfinal/public/assets/img/' . $file['saved_as'];
+                $user = Model_Users::find($dataJwtUser->id);
+                $user->profile_picture = 'http://' . $_SERVER['SERVER_NAME'] . '/IsaacMusic/public/assets/img/' . $file['saved_as'];
                 //$user->picture = 'http://' . $_SERVER['SERVER_NAME'] . '/shigui/Shigui/public/assets/img/' . $file['saved_as'];
                 $user->save();
                // $this->updatePhoto($user->picture);
-                
-
             }
         }
 
@@ -748,10 +672,6 @@ class Controller_Usuarios extends Controller_Rest
             'message' => 'Datos actualizados',
             'data' => [$user]
         ));
-
-
-        // and process any errors
-        
 
         foreach (Upload::get_errors() as $file)
         {
@@ -773,9 +693,6 @@ class Controller_Usuarios extends Controller_Rest
 
     }
 
-
-
-   
 /*
         function decodeToken()
     {
@@ -826,9 +743,6 @@ class Controller_Usuarios extends Controller_Rest
     }
 */
     
-
-
-
        /*public function post_editProfile()
         {
 

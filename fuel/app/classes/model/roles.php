@@ -7,7 +7,7 @@ class Model_Roles extends Orm\Model
     protected static $_primary_key = array('id');
     protected static $_properties = array(
         'id', // both validation & typing observers will ignore the PK
-        'tipo' => array(
+        'type' => array(
             'data_type' => 'varchar'   
         )
         

@@ -1,28 +1,28 @@
 <?php 
 
-class Model_Privacidad extends Orm\Model
+class Model_Privacity extends Orm\Model
 {
-    protected static $_table_name = 'privacidad';
+    protected static $_table_name = 'privacity';
 
     protected static $_primary_key = array('id');
     protected static $_properties = array(
         'id', // both validation & typing observers will ignore the PK
-        'perfil' => array(
+        'profile' => array(
             'data_type' => 'int'   
         ),
-        'amigos' => array(
+        'friends' => array(
             'data_type' => 'int'   
         ),
-        'listas' => array(
+        'lists' => array(
             'data_type' => 'int'   
         ),
-        'notificaciones' => array(
+        'notifications' => array(
             'data_type' => 'int'   
         ),
-        'ubicacion' => array(
+        'ubication' => array(
             'data_type' => 'int'
         ),
-        'id_usuario' => array(
+        'id_user' => array(
             'data_type' => 'int'   
         )
     );

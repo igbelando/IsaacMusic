@@ -2,23 +2,23 @@
 
 namespace Fuel\Migrations;
 
-class Listas
+class lists
 {
 
     function up()
     {
-        \DBUtil::create_table('listas', array(
+        \DBUtil::create_table('lists', array(
             'id' => array('type' => 'int', 'constraint' => 11, 'auto_increment' => true),
-            'titulo' => array('type' => 'varchar', 'constraint' => 100),
+            'title' => array('type' => 'varchar', 'constraint' => 100),
             'editable' => array('type' => 'int', 'constraint' => 1),
-            'id_usuario' => array('type' => 'int', 'constraint' => 11),
+            'id_user' => array('type' => 'int', 'constraint' => 11),
         ), array('id'), false, 'InnoDB', 'utf8_unicode_ci',
 		    array(
 		        array(
-		            'constraint' => 'claveAjenaListasAUsuarios',
-		            'key' => 'id_usuario',
+		            'constraint' => 'foreignKeyListsToUsers',
+		            'key' => 'id_user',
 		            'reference' => array(
-		                'table' => 'usuarios',
+		                'table' => 'users',
 		                'column' => 'id'
 		            ),
 		            'on_update' => 'CASCADE',
@@ -30,6 +30,6 @@ class Listas
 
     function down()
     {
-       \DBUtil::drop_table('listas');
+       \DBUtil::drop_table('lists');
     }
 }

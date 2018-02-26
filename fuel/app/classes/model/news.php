@@ -1,21 +1,22 @@
 <?php 
 
-class Model_Listas extends Orm\Model
+class Model_News extends Orm\Model
 {
-    protected static $_table_name = 'listas';
+    protected static $_table_name = 'news';
 
     protected static $_primary_key = array('id');
     protected static $_properties = array(
         'id', // both validation & typing observers will ignore the PK
-        'titulo' => array(
+        'title' => array(
             'data_type' => 'varchar'   
         ),
-        'id_usuario' => array(
-            'data_type' => 'int'   
+        'description' => array(
+            'data_type' => 'varchar'   
         ),
-        'editable' => array(
+        
+        'id_user' => array(
             'data_type' => 'int'   
-        ),
+        )
         
     );
 }

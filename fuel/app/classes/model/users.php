@@ -1,8 +1,8 @@
 <?php 
 
-class Model_Usuarios extends Orm\Model
+class Model_Users extends Orm\Model
 {
-    protected static $_table_name = 'usuarios';
+    protected static $_table_name = 'users';
 
     protected static $_primary_key = array('id');
     protected static $_properties = array(
@@ -19,13 +19,13 @@ class Model_Usuarios extends Orm\Model
         'id_device' => array(
             'data_type' => 'int'   
         ),
-        'foto_perfil' => array(
+        'profile_picture' => array(
             'data_type' => 'varchar'
         ),
-        'ciudad' => array(
+        'city' => array(
             'data_type' => 'varchar'   
         ),
-        'cumple' => array(
+        'birthday' => array(
             'data_type' => 'varchar'   
         ),
         'email' => array(
@@ -34,10 +34,10 @@ class Model_Usuarios extends Orm\Model
         'id_rol' => array(
             'data_type' => 'int'   
         ),
-        'coordenada_X' => array(
+        'coordinate_X' => array(
             'data_type' => 'decimal'
         ),
-          'coordenada_Y' => array(
+        'coordinate_Y' => array(
             'data_type' => 'decimal'
         )
     );

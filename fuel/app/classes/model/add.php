@@ -1,13 +1,13 @@
 <?php 
 
-class Model_Amigos extends Orm\Model
+class Model_Add extends Orm\Model
 {
-    protected static $_table_name = 'amigos';
+    protected static $_table_name = 'lists_contain_songs';
 
-    protected static $_primary_key = array('id_usuario_seguidor','id_usuario_seguido');
+    protected static $_primary_key = array('id_list','id_song');
     protected static $_properties = array(
-        'id_usuario_seguidor',
-        'id_usuario_seguido' // both validation & typing observers will ignore the PK
+        'id_list',
+        'id_song' // both validation & typing observers will ignore the PK
        
         
     );
