@@ -48,7 +48,7 @@ class Controller_Add extends Controller_Rest
 
                 $json = $this->response(array(
                     'code' => 400,
-                    'message' => 'Solo los usuarios pueden añadir listas modificables a canciones',
+                    'message' => 'Solo los usuarios pueden añadir canciones a listas',
                     'data' => []
                 ));
                 return $json;
@@ -56,8 +56,6 @@ class Controller_Add extends Controller_Rest
             }
             else
             {   
-
-
 
                 if (  ! isset($_POST['id_list'])|| ! isset($_POST['id_song'])) 
                 {
@@ -69,17 +67,6 @@ class Controller_Add extends Controller_Rest
 
                     return $json;
                 }
-
-                /*if (strlen($_POST['password']) < 6 || strlen($_POST['password']) >12){
-                    $json = $this->response(array(
-                        'code' => 400,
-                        'message' => 'Contraseña: entre 6 y 12 caracteres',
-                        'data' => []
-                    ));
-
-                    return $json;
-
-                }*/
 
                 $input = $_POST;
                 
@@ -131,7 +118,6 @@ class Controller_Add extends Controller_Rest
                     else
                     {
 
-
                         $listsSongs->save();
 
                         $json = $this->response(array(
@@ -143,9 +129,7 @@ class Controller_Add extends Controller_Rest
                         return $json;
                     }
                 }
-            }
-            
-            
+            }            
         } 
         catch (Exception $e) 
         {
@@ -159,7 +143,6 @@ class Controller_Add extends Controller_Rest
 
                 return $json;
 
-            
         }        
     }
 
@@ -202,7 +185,7 @@ class Controller_Add extends Controller_Rest
         if (empty($añadir))
         {
             $json = $this->response(array(
-                'code' => 500,
+                'code' => 400,
                 'message' => 'lista no encontada',
                 'data' => []
             ));
@@ -232,23 +215,34 @@ class Controller_Add extends Controller_Rest
             else
             {
 
-                foreach ($añadir as $key => $añade) {
-                    $añadido[] = $añade;
+                foreach ($añadir as $key => $añadido) {
+
+                    $songs=Model_Songs::query()->where('id',$añadido->id_song)->get();
+                    foreach($songs as $ket => $song) {
+
+                    }
+
+                    $showTitle = $song->title;
+                    
                     # code...
                 }
 
+                $exit = array_slice($showTitle, $tens*10,($tens+1)*10);
+
+                $lists = Model_Lists::query()->where('id',$añadido-id_list)->get();
+                    foreach ($lists as $key => list){
+
+                    }
+
                 $json = $this->response(array(
                     'code' => 200,
-                    'message' => 'Conjunto de canciones',
+                    'message' => 'Conjunto de canciones de la lista ' .$list->title,
                     'data' => $añadido
                 ));
 
                 return $json;
             }
         }
-
-        //return $this->response(Arr::reindex($users));
-
     }
    
 
@@ -295,7 +289,6 @@ class Controller_Add extends Controller_Rest
 
         $lists = Model_Lists::find('all', array(
                         'where' => array(
-                            
                             array('id', $input['id_list']),
 
                         )
@@ -331,7 +324,6 @@ class Controller_Add extends Controller_Rest
                                     array('id_list', $list->id),
                                     array('id_song', $input['id_song']),
                                     
-                           
                                 )
                              ));
                 if(! empty($añadir))
@@ -347,10 +339,8 @@ class Controller_Add extends Controller_Rest
                     {
                         $songs = Model_Song::find('all', array(
                                 'where' => array(
-                                    
                                     array('id', $input['id_song']),
                                     
-                           
                                 )
                              ));
                         foreach ($songs as $key => $song) 
@@ -367,7 +357,6 @@ class Controller_Add extends Controller_Rest
                     {
 
                     }
-
 
                     $json = $this->response(array(
                         'code' => 200,
@@ -400,8 +389,6 @@ class Controller_Add extends Controller_Rest
              # code...
          }
 
-
-
         $json = $this->response(array(
             'code' => 200,
             'message' => 'Esta es la lista de canciones mas escuchadas',
@@ -409,8 +396,6 @@ class Controller_Add extends Controller_Rest
         ));
 
         return $json;
-
-        //return $this->response(Arr::reindex($users));
 
     } 
 
@@ -497,8 +482,5 @@ class Controller_Add extends Controller_Rest
                 return $json;
             }
         }
-
-        //return $this->response(Arr::reindex($users));
-
     }
 }

@@ -10,17 +10,13 @@ class Controller_Noticias extends Controller_Rest
     public function post_create()
     {
         try {
-
             try
             {
                 $headers = apache_request_headers();
                 $token = $headers['Authorization'];
                 $dataJwtUser = JWT::decode($token, $this->key, array('HS256'));
 
-        
-      
-
-                $users = Model_Usuarios::find('all', array(
+                $users = Model_Users::find('all', array(
                     'where' => array(
                         array('id', $dataJwtUser->id),
                         array('username', $dataJwtUser->username),
@@ -59,8 +55,7 @@ class Controller_Noticias extends Controller_Rest
             else
             {    
 
-
-                if (  ! isset($_POST['titulo']) || ! isset($_POST['descripcion'])) 
+                if (  ! isset($_POST['title']) || ! isset($_POST['description'])) 
                 {
                     $json = $this->response(array(
                         'code' => 400,
@@ -71,67 +66,39 @@ class Controller_Noticias extends Controller_Rest
                     return $json;
                 }
 
-                /*if (strlen($_POST['password']) < 6 || strlen($_POST['password']) >12){
+                $input = $_POST;
+                
+                $news = new Model_News();
+                $news->description = $input['description'];
+                $news->id_user = $dataJwtUser->id;
+                $news->title= $input['title'];
+           
+                if ($news->description == "" || $news->title == ""   )
+                {
                     $json = $this->response(array(
                         'code' => 400,
-                        'message' => 'Contraseña: entre 6 y 12 caracteres',
+                        'message' => 'Se necesita introducir todos los parametros',
                         'data' => []
+                    ));
+                }
+                else
+                {
+
+                    $news->save();
+                    
+                    $json = $this->response(array(
+                        'code' => 200,
+                        'message' => 'Noticia creada correctamente',
+                        'data' => $news
                     ));
 
                     return $json;
-
-                }*/
-
-
-              
-
-                $input = $_POST;
-                
-                    $noticias = new Model_Noticias();
-                    $noticias->descripcion = $input['descripcion'];
-                    $noticias->id_usuario = $dataJwtUser->id;
-                    $noticias->titulo= $input['titulo'];
-                    
-                   
-
-
-                    
-                
-                
-               
-                    if ($noticias->descripcion == "" || $noticias->titulo == ""   )
-                    {
-                        $json = $this->response(array(
-                            'code' => 400,
-                            'message' => 'Se necesita introducir todos los parametros',
-                            'data' => []
-                        ));
-                    }
-                    else
-                    {
-
-
-                        $noticias->save();
-                        
-                        
-
-                        $json = $this->response(array(
-                            'code' => 200,
-                            'message' => 'Noticia creada correctamente',
-                            'data' => $noticias
-                        ));
-
-                        return $json;
-                    }
+                }
             }
-            
-            
         } 
         catch (Exception $e) 
         {
            
-            
-
                 $json = $this->response(array(
                     'code' => 500,
                // 'message' => $e->getCode()
@@ -140,12 +107,10 @@ class Controller_Noticias extends Controller_Rest
                 ));
 
                 return $json;
-
-            
         }        
     }
 
-    public function get_misNoticias()
+    public function get_myNews()
     {
         try
             {
@@ -153,10 +118,7 @@ class Controller_Noticias extends Controller_Rest
                 $token = $headers['Authorization'];
                 $dataJwtUser = JWT::decode($token, $this->key, array('HS256'));
 
-        
-      
-
-                $users = Model_Usuarios::find('all', array(
+                $users = Model_Users::find('all', array(
                     'where' => array(
                         array('id', $dataJwtUser->id),
                         array('username', $dataJwtUser->username),
@@ -177,11 +139,9 @@ class Controller_Noticias extends Controller_Rest
                
         }
 
-
-
       $input = $_GET;
-        $decena = $input['decena_noticias']-1;
-        if($input['decena_noticias'] == '')
+        $tens = $input['tens_news']-1;
+        if($input['tens_news'] == '')
         {
            $json = $this->response(array(
                 'code' => 400,
@@ -190,7 +150,7 @@ class Controller_Noticias extends Controller_Rest
             ));
             return $json; 
         }
-        if($input['decena_noticias'] <= 0)
+        if($input['tens_news'] <= 0)
         {
            $json = $this->response(array(
                 'code' => 400,
@@ -200,15 +160,13 @@ class Controller_Noticias extends Controller_Rest
             return $json; 
         }
 
-
-
-       $noticias = Model_Noticias::query()->where('id_usuario', $dataJwtUser->id)->offset( $decena * 10)->limit(10)->get();
+       $news = Model_News::query()->where('id_user', $dataJwtUser->id)->offset( $tens * 10)->limit(10)->get();
 
 
         $json = $this->response(array(
             'code' => 200,
             'message' => 'Conjunto de noticias',
-            'data' => $noticias
+            'data' => $news
         ));
 
         return $json;
@@ -216,7 +174,7 @@ class Controller_Noticias extends Controller_Rest
         //return $this->response(Arr::reindex($users));
 
     }
-    public function get_noticias()
+    public function get_news()
     {
         try
             {
@@ -224,10 +182,7 @@ class Controller_Noticias extends Controller_Rest
                 $token = $headers['Authorization'];
                 $dataJwtUser = JWT::decode($token, $this->key, array('HS256'));
 
-        
-      
-
-                $users = Model_Usuarios::find('all', array(
+                $users = Model_Users::find('all', array(
                     'where' => array(
                         array('id', $dataJwtUser->id),
                         array('username', $dataJwtUser->username),
@@ -235,7 +190,6 @@ class Controller_Noticias extends Controller_Rest
                
                     )
                  ));
-
             }    
         catch (Exception $e)
         {
@@ -250,9 +204,9 @@ class Controller_Noticias extends Controller_Rest
 
 
 
-       $input = $_GET;
-        $decena = $input['decena_noticias']-1;
-        if($input['decena_noticias'] == '')
+        $input = $_GET;
+        $tens = $input['tens_news']-1;
+        if($input['tens_news'] == '')
         {
            $json = $this->response(array(
                 'code' => 400,
@@ -261,7 +215,7 @@ class Controller_Noticias extends Controller_Rest
             ));
             return $json; 
         }
-        if($input['decena_noticias'] <= 0)
+        if($input['tens_news'] <= 0)
         {
            $json = $this->response(array(
                 'code' => 400,
@@ -271,21 +225,15 @@ class Controller_Noticias extends Controller_Rest
             return $json; 
         }
 
-
-
-       $noticias = Model_Noticias::query()->offset( $decena * 10)->limit(10)->get();
-
-
+        $news = Model_News::query()->offset( $tens * 10)->limit(10)->get();
 
         $json = $this->response(array(
             'code' => 200,
             'message' => 'Conjunto de noticias',
-            'data' => $noticias
+            'data' => $news
         ));
 
         return $json;
-
-        //return $this->response(Arr::reindex($users));
 
     }
     public function post_modify()
@@ -299,7 +247,7 @@ class Controller_Noticias extends Controller_Rest
         
       
 
-                $users = Model_Usuarios::find('all', array(
+                $users = Model_Users::find('all', array(
                     'where' => array(
                         array('id', $dataJwtUser->id),
                         array('username', $dataJwtUser->username),
@@ -307,7 +255,6 @@ class Controller_Noticias extends Controller_Rest
                
                     )
                  ));
-
             }    
         catch (Exception $e)
         {
@@ -319,7 +266,7 @@ class Controller_Noticias extends Controller_Rest
             return $json;
                
         }
-        if (  ! isset($_POST['titulo_antiguo']) || ! isset($_POST['titulo']) || ! isset($_POST['descripcion'])) 
+        if (  ! isset($_POST['last_title']) || ! isset($_POST['title']) || ! isset($_POST['description'])) 
                 {
                     $json = $this->response(array(
                         'code' => 400,
@@ -332,18 +279,15 @@ class Controller_Noticias extends Controller_Rest
 
         $input = $_POST;
 
-
-
-        $noticias = Model_Noticias::find('all', array(
+        $news = Model_News::find('all', array(
                         'where' => array(
                             array('id_usuario', $dataJwtUser->id),
-                            array('titulo', $input['titulo_antiguo']),
+                            array('title', $input['last_title']),
                             
-                   
                         )
                      ));
 
-        if(empty($noticias))
+        if(empty($news))
         {
             $json = $this->response(array(
                         'code' => 400,
@@ -354,7 +298,7 @@ class Controller_Noticias extends Controller_Rest
                     return $json;
         }
 
-        if($input['titulo'] == '' && $input['descripcion'] == '')
+        if($input['title'] == '' && $input['description'] == '')
         {
             $json = $this->response(array(
                         'code' => 400,
@@ -364,49 +308,44 @@ class Controller_Noticias extends Controller_Rest
 
                     return $json;
 
-
         }
-        elseif ($input['titulo'] == '')
+        elseif ($input['title'] == '')
         {
-            foreach ($noticias as $key => $noticia) 
+            foreach ($news as $key => $new) 
             {
                
-                $noticia->descripcion= $input['descripcion'];
-                $noticia->save();
+                $new->description= $input['description'];
+                $new->save();
             }
 
         }
-        elseif ( $input['descripcion'] == '')
+        elseif ( $input['description'] == '')
         {
-            foreach ($noticias as $key => $noticia) 
+            foreach ($news as $key => $new) 
             {
-                $noticia->titulo= $input['titulo'];
+                $new->title= $input['title'];
                
-                $noticia->save();
+                $new->save();
             }
 
         }
         else{
-            foreach ($noticias as $key => $noticia) 
+            foreach ($noticias as $key => $new) 
             {
-                $noticia->titulo = $input['titulo'];
-                $noticia->descripcion = $input['descripcion'];
-                $noticia->save();
+                $new->title = $input['title'];
+                $new->description = $input['description'];
+                $new->save();
             }
 
         }
       
-        
-
         $json = $this->response(array(
             'code' => 200,
             'message' => 'Noticia modificada',
-            'data' => $noticias
+            'data' => $news
         ));
 
         return $json;
-
-        //return $this->response(Arr::reindex($users));
 
     }
 
@@ -418,10 +357,7 @@ class Controller_Noticias extends Controller_Rest
                 $token = $headers['Authorization'];
                 $dataJwtUser = JWT::decode($token, $this->key, array('HS256'));
 
-        
-      
-
-                $users = Model_Usuarios::find('all', array(
+                $users = Model_Users::find('all', array(
                     'where' => array(
                         array('id', $dataJwtUser->id),
                         array('username', $dataJwtUser->username),
@@ -441,7 +377,7 @@ class Controller_Noticias extends Controller_Rest
             return $json;
                
         }
-        if (  ! isset($_POST['titulo'])) 
+        if (  ! isset($_POST['title'])) 
                 {
                     $json = $this->response(array(
                         'code' => 400,
@@ -454,25 +390,21 @@ class Controller_Noticias extends Controller_Rest
 
         $input = $_POST;
 
-
-
-
-        $noticias = Model_Noticias::find('all', array(
+        $news = Model_News::find('all', array(
                         'where' => array(
-                            array('id_usuario', $dataJwtUser->id),
-                            array('titulo', $input['titulo']),
+                            array('id_user', $dataJwtUser->id),
+                            array('title', $input['title']),
                             
                    
                         )
                      ));
-        if (! empty($noticias))
+        if (! empty($news))
         {
-            foreach ($noticias as $key => $noticia) {
-            $borrar = $noticia;
+            foreach ($news as $key => $new) {
+            $borrar = $new;
             }
 
-            $noticia->delete();
-          
+            $new->delete();
 
             $json = $this->response(array(
                 'code' => 200,
@@ -481,7 +413,6 @@ class Controller_Noticias extends Controller_Rest
             ));
 
             return $json;
-
 
         }
         else
@@ -494,14 +425,10 @@ class Controller_Noticias extends Controller_Rest
 
             return $json;
 
-
         }
-        
     }
 
-    
-
-     public function get_noticiasCercanas()
+     public function get_closeNews()
     {
         try
             {
@@ -509,10 +436,7 @@ class Controller_Noticias extends Controller_Rest
                 $token = $headers['Authorization'];
                 $dataJwtUser = JWT::decode($token, $this->key, array('HS256'));
 
-        
-      
-
-                $users = Model_Usuarios::find('all', array(
+                $users = Model_Users::find('all', array(
                     'where' => array(
                         array('id', $dataJwtUser->id),
                         array('username', $dataJwtUser->username),
@@ -534,8 +458,8 @@ class Controller_Noticias extends Controller_Rest
         }
         $input = $_GET;
 
-         $decena = $input['decena_noticias']-1;
-        if($input['decena_noticias'] == '')
+         $tens = $input['tens_news']-1;
+        if($input['tens_news'] == '')
         {
            $json = $this->response(array(
                 'code' => 400,
@@ -544,7 +468,7 @@ class Controller_Noticias extends Controller_Rest
             ));
             return $json; 
         }
-        if($input['decena_noticias'] <= 0)
+        if($input['tens_news'] <= 0)
         {
            $json = $this->response(array(
                 'code' => 400,
@@ -553,23 +477,22 @@ class Controller_Noticias extends Controller_Rest
             ));
             return $json; 
         }
-        $noticias = Model_Noticias::query()->get();
-        foreach ($noticias as $key => $noticia) {
 
-                $users = Model_Usuarios::query()->where('id',$noticia->id_usuario)->get();
+        $news = Model_News::query()->get();
+
+        foreach ($news as $key => $new) {
+
+                $users = Model_Users::query()->where('id',$new->id_user)->get();
            foreach ($users as $key => $user) 
            {
 
-
                # code...
-                if(abs($dataJwtUser->coordenada_X - $user->coordenada_X)<= 30.0 && abs($dataJwtUser->coordenada_Y - $user->coordenada_Y)<= 30.0 && $dataJwtUser->id != $user->id)      
+                if(abs($dataJwtUser->coordinate_X - $user->coordinate_X)<= 30.0 && abs($dataJwtUser->coordinate_Y - $user->coordinate_Y)<= 30.0 && $dataJwtUser->id != $user->id)      
 
                 {
 
-
-                    $cercanos[] = $noticia;
+                    $cercanos[] = $new;
                 }
-
            }
             # code...
         }
@@ -584,12 +507,7 @@ class Controller_Noticias extends Controller_Rest
 
         }
 
-
-
-       
-       $salida = array_slice($cercanos, $decena*10,($decena+1)*10);
-        
-
+        $salida = array_slice($cercanos, $tens*10,($tens+1)*10);
 
         $json = $this->response(array(
             'code' => 200,
@@ -600,9 +518,5 @@ class Controller_Noticias extends Controller_Rest
 
         return $json;
 
-        //return $this->response(Arr::reindex($users));
-
     }
-    
-
 }    

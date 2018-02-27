@@ -56,9 +56,6 @@ class Controller_Users extends Controller_Rest
                     
                 }
 
-                /*$password = ['password' => $input['password']];
-                $dataJwtPassword = JWT::decode($password, $this->key);*/
-
                 else
                 {
                     $user = new Model_Users();
@@ -170,8 +167,6 @@ class Controller_Users extends Controller_Rest
 
         return $json;
 
-    	//return $this->response(Arr::reindex($users));
-
     }
     public function get_closeUsers()
     {
@@ -255,33 +250,8 @@ class Controller_Users extends Controller_Rest
 
         return $json;
 
-        //return $this->response(Arr::reindex($users));
-
     }
 
-    /*public function get_user()
-    {
-
-            $header = apache_request_headers();
-            if (isset($header['Authorization'])) 
-                {
-                    $token = $header['Authorization'];
-                    $dataJwtUser = JWT::decode($token, $this->key, array('HS256'));
-                }
-        $user = Model_Users::find($dataJwtUser->id);
-
-        $json = $this->response(array(
-            'code' => 200,
-            'message' => 'Este es el usuario',
-            'data' => $user
-
-        ));
-
-        return $json;
-
-        //return $this->response(Arr::reindex($users));
-
-    }*/
     private function privacityDefault($id)
     {
        
@@ -295,7 +265,6 @@ class Controller_Users extends Controller_Rest
         $privacity->save();
        
     }  
-
 
                                       //Eliminar usuario
     public function post_delete()
@@ -525,9 +494,6 @@ class Controller_Users extends Controller_Rest
                 $token = $headers['Authorization'];
                 $dataJwtUser = JWT::decode($token, $this->key, array('HS256'));
 
-        
-      
-
                 $users = Model_Users::find('all', array(
                     'where' => array(
                         array('id', $dataJwtUser->id),
@@ -639,7 +605,6 @@ class Controller_Users extends Controller_Rest
                     $dataJwtUser = JWT::decode($token, $this->key, array('HS256'));
                 }
 
-
         // Custom configuration for this upload
         $config = array(
             'path' => DOCROOT . 'assets/img',
@@ -688,67 +653,6 @@ class Controller_Users extends Controller_Rest
                 'message' => $e->getMessage(),
                 'data' => []
             ));
-
-        }
-
-    }
-
-/*
-        function decodeToken()
-    {
-
-        $jwt = apache_request_headers()['Authorization'];
-        $token = JWT::decode($jwt, $this->key , array('HS256'));
-        return $token;
-    }
-
-    function userNotRegistered($email)
-    {
-
-        $users = Model_Users::find('first', array(
-            'where' => array(
-                array('email', $email),
-                array('is_registered', 0)
-                )
-            )); 
-
-        if($users != null){
-            return true;
-        }else{
-            return false;
         }
     }
-    
-
-    function validateToken($jwt)
-    {
-        $token = JWT::decode($jwt, $this->key, array('HS256'));
-
-        $email = $token->data->email;
-        $password = $token->data->password;
-        $id = $token->data->id;
-
-        $users = Model_Users::find('all', array(
-            'where' => array(
-                array('email', $email),
-                array('password', $password),
-                array('id',$id)
-                )
-            ));
-        if($users != null){
-            return true;
-        }else{
-            return false;
-        }
-    }
-*/
-    
-       /*public function post_editProfile()
-        {
-
-
-    //nombre email y foto
-
-        }*/
-
 }    

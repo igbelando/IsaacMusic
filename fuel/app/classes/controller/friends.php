@@ -73,7 +73,6 @@ class Controller_Friends extends Controller_Rest
                         
                         array('username', $input['username']),
                         
-               
                     )
                  ));
 
@@ -233,7 +232,6 @@ class Controller_Friends extends Controller_Rest
             return $json;
         
         }
-        //return $this->response(Arr::reindex($users));
     }
                                             //Mostrar Seguidores
 
