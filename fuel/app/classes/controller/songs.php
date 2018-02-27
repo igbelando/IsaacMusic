@@ -2,7 +2,7 @@
 
 use \Firebase\JWT\JWT;
 
-class Controller_Canciones extends Controller_Rest
+class Controller_Song extends Controller_Rest
 {
     private $key = "jnf4lcf4hg3ghg53vgvkx24vxg";
    
@@ -17,10 +17,7 @@ class Controller_Canciones extends Controller_Rest
                 $token = $headers['Authorization'];
                 $dataJwtUser = JWT::decode($token, $this->key, array('HS256'));
 
-        
-      
-
-                $users = Model_Usuarios::find('all', array(
+                $users = Model_Users::find('all', array(
                     'where' => array(
                         array('id', $dataJwtUser->id),
                         array('username', $dataJwtUser->username),
@@ -59,8 +56,7 @@ class Controller_Canciones extends Controller_Rest
             else
             {    
 
-
-                if ( ! isset($_POST['artista']) || ! isset($_POST['url']) || ! isset($_POST['titulo'])) 
+                if ( ! isset($_POST['artist']) || ! isset($_POST['url']) || ! isset($_POST['title'])) 
                 {
                     $json = $this->response(array(
                         'code' => 400,
@@ -71,67 +67,40 @@ class Controller_Canciones extends Controller_Rest
                     return $json;
                 }
 
-                /*if (strlen($_POST['password']) < 6 || strlen($_POST['password']) >12){
+                $input = $_POST;
+                
+                $songs = new Model_Songs();
+                $songs->artist= $input['artist'];
+                $songs->url= $input['url'];
+                $songs->title= $input['title'];
+                $songs->reproducciones= 0;
+               
+                if ($songs->artist == "" || $songs->title == "" || $songs->url == ""  )
+                {
                     $json = $this->response(array(
                         'code' => 400,
-                        'message' => 'Contraseña: entre 6 y 12 caracteres',
+                        'message' => 'Se necesita introducir todos los parametros',
                         'data' => []
+                    ));
+                }
+                else
+                {
+
+                    $songs->save();
+                    
+                    $json = $this->response(array(
+                        'code' => 200,
+                        'message' => 'Cancion creada correctamente',
+                        'data' => $songs
                     ));
 
                     return $json;
-
-                }*/
-
-
-              
-
-                $input = $_POST;
-                
-                    $canciones = new Model_Canciones();
-                    $canciones->artista= $input['artista'];
-                    $canciones->url= $input['url'];
-                    $canciones->titulo= $input['titulo'];
-                    $canciones->reproducciones= 0;
-                   
-
-
-                    
-                
-                
-               
-                    if ($canciones->artista == "" || $canciones->titulo == "" || $canciones->url == ""  )
-                    {
-                        $json = $this->response(array(
-                            'code' => 400,
-                            'message' => 'Se necesita introducir todos los parametros',
-                            'data' => []
-                        ));
-                    }
-                    else
-                    {
-
-
-                        $canciones->save();
-                        
-                        
-
-                        $json = $this->response(array(
-                            'code' => 200,
-                            'message' => 'Cancion creada correctamente',
-                            'data' => $canciones
-                        ));
-
-                        return $json;
-                    }
+                }
             }
-            
-            
         } 
         catch (Exception $e) 
         {
            
-            
-
                 $json = $this->response(array(
                     'code' => 500,
                // 'message' => $e->getCode()
@@ -141,7 +110,6 @@ class Controller_Canciones extends Controller_Rest
 
                 return $json;
 
-            
         }        
     }
 
@@ -154,10 +122,7 @@ class Controller_Canciones extends Controller_Rest
                 $token = $headers['Authorization'];
                 $dataJwtUser = JWT::decode($token, $this->key, array('HS256'));
 
-        
-      
-
-                $users = Model_Usuarios::find('all', array(
+                $users = Model_Users::find('all', array(
                     'where' => array(
                         array('id', $dataJwtUser->id),
                         array('username', $dataJwtUser->username),
@@ -186,24 +151,22 @@ class Controller_Canciones extends Controller_Rest
         {
 
                 $input = $_GET;
-                $canciones = Model_Canciones::find('all', array(
+                $songs = Model_Song::find('all', array(
                             'where' => array(
                                 array('id', $input['id']),
 
-                                
-                       
                             )
                          ));
-                foreach ($canciones as $key => $cancion) {
-                    $cancion->reproducciones += 1;
-                    $cancion->save();
+                foreach ($songs as $key => $song) {
+                    $song->reproducciones += 1;
+                    $song->save();
                     # code...
                 }
 
                 $json = $this->response(array(
                     'code' => 200,
                     'message' => 'Cancion escuchada',
-                    'data' => $canciones
+                    'data' => $songs
                 ));
 
                 return $json;
@@ -215,14 +178,6 @@ class Controller_Canciones extends Controller_Rest
                     'message' => 'Solo pueden escuchar los usuarios',
                     'data' => []
                 ));
-
-
         }
-
-        //return $this->response(Arr::reindex($users));
-
     }
-                                    //Mostrar usuarios
-    
-
-    }    
+}    

@@ -12,7 +12,7 @@ class Controller_Roles extends Controller_Rest
     public function post_create()
     {
         try {
-            if ( ! isset($_POST['tipo']) ) 
+            if ( ! isset($_POST['type']) ) 
             {
                 $json = $this->response(array(
                     'code' => 400,
@@ -26,9 +26,9 @@ class Controller_Roles extends Controller_Rest
             $input = $_POST;
             
                 $roles = new Model_Roles();
-                $roles->tipo= $input['tipo'];
+                $roles->type= $input['type'];
                
-                if ($roles->tipo == "" )
+                if ($roles->type == "" )
                 {
                     $json = $this->response(array(
                         'code' => 400,

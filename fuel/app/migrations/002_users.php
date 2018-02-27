@@ -16,6 +16,7 @@ class users
             'profile_picture' => array('type' => 'varchar', 'constraint' => 100, 'null' => true),
             'description' => array('type' => 'varchar', 'constraint' => 400, 'null' => true),
             'birthday' => array('type' => 'varchar', 'constraint' => 20, 'null' => true),
+            'city' => array('type' => 'varchar', 'constraint' => 100, 'null' => true),
             'coordinate_X' => array('type' => 'float', 'constraint' => 50),
             'coordinate_Y' => array('type' => 'float', 'constraint' => 50),
             'id_rol' => array('type' => 'int', 'constraint' => 11),
