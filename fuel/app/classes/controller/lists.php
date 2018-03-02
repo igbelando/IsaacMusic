@@ -2,11 +2,11 @@
 
 use \Firebase\JWT\JWT;
 
-class Controller_Listas extends Controller_Rest
+class Controller_Lists extends Controller_Rest
 {
     private $key = "jnf4lcf4hg3ghg53vgvkx24vxg";
    
-                                    //Crear usuario
+                                    //Crear listas
     public function post_create()
     {
         try {
@@ -17,10 +17,7 @@ class Controller_Listas extends Controller_Rest
                 $token = $headers['Authorization'];
                 $dataJwtUser = JWT::decode($token, $this->key, array('HS256'));
 
-        
-      
-
-                $users = Model_Usuarios::find('all', array(
+                $users = Model_Users::find('all', array(
                     'where' => array(
                         array('id', $dataJwtUser->id),
                         array('username', $dataJwtUser->username),
@@ -59,8 +56,7 @@ class Controller_Listas extends Controller_Rest
             else
             {    
 
-
-                if (  ! isset($_POST['titulo'])) 
+                if (  ! isset($_POST['title'])) 
                 {
                     $json = $this->response(array(
                         'code' => 400,
@@ -71,35 +67,14 @@ class Controller_Listas extends Controller_Rest
                     return $json;
                 }
 
-                /*if (strlen($_POST['password']) < 6 || strlen($_POST['password']) >12){
-                    $json = $this->response(array(
-                        'code' => 400,
-                        'message' => 'Contraseña: entre 6 y 12 caracteres',
-                        'data' => []
-                    ));
-
-                    return $json;
-
-                }*/
-
-
-              
-
                 $input = $_POST;
                 
-                    $listas = new Model_Listas();
-                    $listas->editable= 1;
-                    $listas->id_usuario = $dataJwtUser->id;
-                    $listas->titulo= $input['titulo'];
-                    
-                   
-
-
-                    
-                
-                
+                    $lists = new Model_Lists();
+                    $lists->editable= 1;
+                    $lists->id_user = $dataJwtUser->id;
+                    $lists->title= $input['title'];
                
-                    if ($listas->id_usuario == "" || $listas->titulo == ""   )
+                    if ($lists->id_user == "" || $lists->title == ""   )
                     {
                         $json = $this->response(array(
                             'code' => 400,
@@ -111,14 +86,12 @@ class Controller_Listas extends Controller_Rest
                     {
 
 
-                        $listas->save();
+                        $lists->save();
                         
-                        
-
                         $json = $this->response(array(
                             'code' => 200,
                             'message' => 'Cancion creada correctamente',
-                            'data' => $listas
+                            'data' => $lists
                         ));
 
                         return $json;
@@ -131,7 +104,6 @@ class Controller_Listas extends Controller_Rest
         {
            
             
-
                 $json = $this->response(array(
                     'code' => 500,
                // 'message' => $e->getCode()
@@ -140,12 +112,10 @@ class Controller_Listas extends Controller_Rest
                 ));
 
                 return $json;
-
-            
         }        
     }
 
-    public function get_listas()
+    public function get_lists()
     {
         try
             {
@@ -156,7 +126,7 @@ class Controller_Listas extends Controller_Rest
         
       
 
-                $users = Model_Usuarios::find('all', array(
+                $users = Model_Users::find('all', array(
                     'where' => array(
                         array('id', $dataJwtUser->id),
                         array('username', $dataJwtUser->username),
@@ -178,8 +148,8 @@ class Controller_Listas extends Controller_Rest
         }
 
         $input = $_GET;
-        $decena = $input['decena_lista']-1;
-        if($input['decena_lista'] == '')
+        $tens = $input['tens_list']-1;
+        if($input['tens_list'] == '')
         {
            $json = $this->response(array(
                 'code' => 400,
@@ -188,7 +158,7 @@ class Controller_Listas extends Controller_Rest
             ));
             return $json; 
         }
-        if($input['decena_lista'] <= 0)
+        if($input['tens_list'] <= 0)
         {
            $json = $this->response(array(
                 'code' => 400,
@@ -200,17 +170,15 @@ class Controller_Listas extends Controller_Rest
 
 
 
-       $listas = Model_Listas::query()->where('id_usuario', $dataJwtUser->id)->offset( $decena * 10)->limit(10)->get();
+       $lists = Model_Lists::query()->where('id_user', $dataJwtUser->id)->offset( $tens * 10)->limit(10)->get();
 
         $json = $this->response(array(
             'code' => 200,
             'message' => 'Conjunto de listas',
-            'data' => $listas
+            'data' => $lists
         ));
 
         return $json;
-
-        //return $this->response(Arr::reindex($users));
 
     }
     public function post_modifyList()
@@ -221,10 +189,7 @@ class Controller_Listas extends Controller_Rest
                 $token = $headers['Authorization'];
                 $dataJwtUser = JWT::decode($token, $this->key, array('HS256'));
 
-        
-      
-
-                $users = Model_Usuarios::find('all', array(
+                $users = Model_Users::find('all', array(
                     'where' => array(
                         array('id', $dataJwtUser->id),
                         array('username', $dataJwtUser->username),
@@ -244,7 +209,7 @@ class Controller_Listas extends Controller_Rest
             return $json;
                
         }
-        if (  ! isset($_POST['titulo']) || ! isset($_POST['id'])) 
+        if (  ! isset($_POST['title']) || ! isset($_POST['id'])) 
                 {
                     $json = $this->response(array(
                         'code' => 400,
@@ -259,30 +224,29 @@ class Controller_Listas extends Controller_Rest
 
 
 
-        $listas = Model_Listas::find('all', array(
+        $lists = Model_Lists::find('all', array(
                         'where' => array(
-                            array('id_usuario', $dataJwtUser->id),
+                            array('id_user', $dataJwtUser->id),
                             array('id', $input['id']),
                             
                    
                         )
                      ));
       
-        foreach ($listas as $key => $lista) 
+        foreach ($lists as $key => $list) 
         {
-            $lista->titulo = $input['titulo'];
-            $lista->save();
+            $list->title = $input['title'];
+            $list->save();
         }
 
         $json = $this->response(array(
             'code' => 200,
             'message' => 'Conjunto de listas',
-            'data' => $listas
+            'data' => $lists
         ));
 
         return $json;
 
-        //return $this->response(Arr::reindex($users));
 
     }
 
@@ -297,7 +261,7 @@ class Controller_Listas extends Controller_Rest
         
       
 
-                $users = Model_Usuarios::find('all', array(
+                $users = Model_Users::find('all', array(
                     'where' => array(
                         array('id', $dataJwtUser->id),
                         array('username', $dataJwtUser->username),
@@ -330,24 +294,21 @@ class Controller_Listas extends Controller_Rest
 
         $input = $_POST;
 
-
-
-
-        $listas = Model_Listas::find('all', array(
+        $lists = Model_Lists::find('all', array(
                         'where' => array(
-                            array('id_usuario', $dataJwtUser->id),
+                            array('id_user', $dataJwtUser->id),
                             array('id', $input['id']),
                             
                    
                         )
                      ));
-        if (! empty($listas))
+        if (! empty($lists))
         {
-            foreach ($listas as $key => $lista) {
-            $borrar = $lista;
+            foreach ($lists as $key => $list) {
+            $borrar = $list;
             }
 
-            $lista->delete();
+            $list->delete();
           
 
             $json = $this->response(array(
@@ -370,10 +331,6 @@ class Controller_Listas extends Controller_Rest
 
             return $json;
 
-
-        }
-        
+        } 
     }
-    
-
 }    

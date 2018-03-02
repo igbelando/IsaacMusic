@@ -2,11 +2,11 @@
 
 use \Firebase\JWT\JWT;
 
-class Controller_Song extends Controller_Rest
+class Controller_Songs extends Controller_Rest
 {
     private $key = "jnf4lcf4hg3ghg53vgvkx24vxg";
    
-                                    //Crear usuario
+                                    //Crear cancion
     public function post_create()
     {
         try {
@@ -60,7 +60,7 @@ class Controller_Song extends Controller_Rest
                 {
                     $json = $this->response(array(
                         'code' => 400,
-                        'message' => 'Error en las credenciales, prueba otra vez',
+                        'message' => 'Se necesita introducir todos los parametros',
                         'data' => []
                     ));
 
@@ -73,13 +73,13 @@ class Controller_Song extends Controller_Rest
                 $songs->artist= $input['artist'];
                 $songs->url= $input['url'];
                 $songs->title= $input['title'];
-                $songs->reproducciones= 0;
+                $songs->views= 0;
                
-                if ($songs->artist == "" || $songs->title == "" || $songs->url == ""  )
+                if ($this->URLCreated($input['url']))
                 {
                     $json = $this->response(array(
                         'code' => 400,
-                        'message' => 'Se necesita introducir todos los parametros',
+                        'message' => 'No puede haber dos URL identicas, esa cancion ya existe',
                         'data' => []
                     ));
                 }
@@ -113,71 +113,21 @@ class Controller_Song extends Controller_Rest
         }        
     }
 
+    public function URLCreated($url)
     
-    public function get_reproduceSong()
     {
-        try
-            {
-                $headers = apache_request_headers();
-                $token = $headers['Authorization'];
-                $dataJwtUser = JWT::decode($token, $this->key, array('HS256'));
+        $url = Model_Songs::find('all', array(
+            'where' => array(
+                array('url', $url)
+            )
+        ));
 
-                $users = Model_Users::find('all', array(
-                    'where' => array(
-                        array('id', $dataJwtUser->id),
-                        array('username', $dataJwtUser->username),
-                        array('password', $dataJwtUser->password)
-               
-                    )
-                 ));
-
-            }    
-        catch (Exception $e)
-        {
-                $json = $this->response(array(
-                    'code' => 500,
-                    'message' => $e->getMessage(),
-                    'data' => []
-                ));
-                return $json;
-               
-        }
-        foreach ($users as $key => $user)
-        {
-            $rol = $user->id_rol;
-        }
-            
-        if ($rol != 1)
-        {
-
-                $input = $_GET;
-                $songs = Model_Song::find('all', array(
-                            'where' => array(
-                                array('id', $input['id']),
-
-                            )
-                         ));
-                foreach ($songs as $key => $song) {
-                    $song->reproducciones += 1;
-                    $song->save();
-                    # code...
-                }
-
-                $json = $this->response(array(
-                    'code' => 200,
-                    'message' => 'Cancion escuchada',
-                    'data' => $songs
-                ));
-
-                return $json;
+        if(count($url) < 1) {
+            return false;
         }
         else
         {
-                $json = $this->response(array(
-                    'code' => 400,
-                    'message' => 'Solo pueden escuchar los usuarios',
-                    'data' => []
-                ));
+            return true;
         }
-    }
+    }                              
 }    

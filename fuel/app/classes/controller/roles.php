@@ -8,7 +8,7 @@ class Controller_Roles extends Controller_Rest
 
     private $getEmail = "";
 
-                                    //Crear usuario
+                                    //Crear roles
     public function post_create()
     {
         try {

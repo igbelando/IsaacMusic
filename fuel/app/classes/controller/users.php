@@ -89,7 +89,6 @@ class Controller_Users extends Controller_Rest
                             );
 
                         $token = JWT::encode($dataToken, $this->key);
-                        $this->privacityDefault($user->id);
 
                         $json = $this->response(array(
                             'code' => 200,
@@ -131,12 +130,13 @@ class Controller_Users extends Controller_Rest
             }  
         }        
     }
+
                                     //Mostrar usuarios
     public function get_users()
     {
         $input = $_GET;
 
-    	 $tens = $input['tens_users']-1;
+    	$tens = $input['tens_users']-1;
         if($input['tens_users'] == '')
         {
            $json = $this->response(array(
@@ -168,103 +168,6 @@ class Controller_Users extends Controller_Rest
         return $json;
 
     }
-    public function get_closeUsers()
-    {
-        try{
-
-                $headers = apache_request_headers();
-                $token = $headers['Authorization'];
-                $dataJwtUser = JWT::decode($token, $this->key, array('HS256'));
-
-                $users = Model_Users::find('all', array(
-                    'where' => array(
-                        array('id', $dataJwtUser->id),
-                        array('username', $dataJwtUser->username),
-                        array('password', $dataJwtUser->password)
-               
-                    )
-                 ));
-
-            }    
-        catch (Exception $e)
-        {
-            $json = $this->response(array(
-                'code' => 500,
-                'message' => $e->getMessage(),
-                'data' => []
-            ));
-            return $json;
-               
-        }
-        $input = $_GET;
-
-         $tens = $input['tens_users']-1;
-        if($input['tens_users'] == '')
-        {
-           $json = $this->response(array(
-                'code' => 400,
-                'message' => 'Introduce una decena',
-                'data' => []
-            ));
-            return $json; 
-        }
-        if($input['tens_users'] <= 0)
-        {
-           $json = $this->response(array(
-                'code' => 400,
-                'message' => 'La decena minima es 1',
-                'data' => []
-            ));
-            return $json; 
-        }
-
-       $users = Model_Users::query()->where('id_rol',2)->get();
-       foreach ($users as $key => $user) {
-           # code...
-        if(abs($dataJwtUser->coordinate_X - $user->coordinate_X)<= 30.0 && abs($dataJwtUser->coordinate_Y - $user->coordinate_Y)<= 30.0 && $dataJwtUser->id != $user->id)      
-
-        {
-
-            $close[] = $user;
-        }
-
-       }
-       if(empty($close))
-        {
-            $json = $this->response(array(
-                'code' => 400,
-                'message' => 'No hay usuarios encontrados',
-                'data' => []
-            ));
-            return $json; 
-
-        }
-       $exit = array_slice($close, $tens*10,($tens+1)*10);
-        
-        $json = $this->response(array(
-            'code' => 200,
-            'message' => 'Esta es la lista de usuarios cercanos',
-            'data' => $exit
-
-        ));
-
-        return $json;
-
-    }
-
-    private function privacityDefault($id)
-    {
-       
-        $privacity= new Model_Privacity();
-        $privacity->id_user = $id;
-        $privacity->profile = 1;
-        $privacity->friends = 1;
-        $privacity->lists = 1;
-        $privacity->notifications = 1;
-        $privacity->ubication =1;
-        $privacity->save();
-       
-    }  
 
                                       //Eliminar usuario
     public function post_delete()
@@ -485,6 +388,7 @@ class Controller_Users extends Controller_Rest
             return $json;
         }
     }
+
     function post_modifyUser()
     {
         try {
@@ -590,69 +494,6 @@ class Controller_Users extends Controller_Rest
                     'data' => []
                     ));
             }
-        }
-    }
-
-    public function uploadImage()
-    {
-
-        try{
-            $header = apache_request_headers();
-
-            if (isset($header['Authorization'])) 
-                {
-                    $token = $header['Authorization'];
-                    $dataJwtUser = JWT::decode($token, $this->key, array('HS256'));
-                }
-
-        // Custom configuration for this upload
-        $config = array(
-            'path' => DOCROOT . 'assets/img',
-            'randomize' => true,
-            'ext_whitelist' => array('img', 'jpg', 'jpeg', 'gif', 'png'),
-        );
-
-        // process the uploaded files in $_FILES
-        Upload::process($config);
-
-        // if there are any valid files
-        if (Upload::is_valid())
-        {
-            
-            // save them according to the config
-            Upload::save();
-
-            foreach(Upload::get_files() as $file)
-            {
-                $user = Model_Users::find($dataJwtUser->id);
-                $user->profile_picture = 'http://' . $_SERVER['SERVER_NAME'] . '/IsaacMusic/public/assets/img/' . $file['saved_as'];
-                //$user->picture = 'http://' . $_SERVER['SERVER_NAME'] . '/shigui/Shigui/public/assets/img/' . $file['saved_as'];
-                $user->save();
-               // $this->updatePhoto($user->picture);
-            }
-        }
-
-        return $this->response(array(
-            'code' => 200,
-            'message' => 'Datos actualizados',
-            'data' => [$user]
-        ));
-
-        foreach (Upload::get_errors() as $file)
-        {
-            return $this->response(array(
-                'code' => 500,
-                'message' => 'No se ha podido subir la imagen',
-                'data' => []
-            ));
-        }
-      
-        }catch (Exception $e){
-            return $this->response(array(
-                'code' => 500,
-                'message' => $e->getMessage(),
-                'data' => []
-            ));
         }
     }
 }    

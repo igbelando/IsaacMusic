@@ -6,7 +6,7 @@ class Controller_Noticias extends Controller_Rest
 {
     private $key = "jnf4lcf4hg3ghg53vgvkx24vxg";
    
-                                    //Crear usuario
+                                    //Crear noticias
     public function post_create()
     {
         try {

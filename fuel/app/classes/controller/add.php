@@ -106,7 +106,7 @@ class Controller_Add extends Controller_Rest
                         # code...
                     }
 
-                    if ($list->editable == 2 || $list->id_usero != $dataJwtUser->id)
+                    if ($list->editable == 2 || $list->id_user != $dataJwtUser->id)
                     {
                         $json = $this->response(array(
                             'code' => 400,
@@ -122,7 +122,7 @@ class Controller_Add extends Controller_Rest
 
                         $json = $this->response(array(
                             'code' => 200,
-                            'message' => 'Cancion añadida a '. $list->titulo. ' correctamente',
+                            'message' => 'Cancion añadida a '. $list->title. ' correctamente',
                             'data' => $listsSongs
                         ));
 
@@ -378,109 +378,5 @@ class Controller_Add extends Controller_Rest
                 }
             } 
         }   
-    }
-
-    public function get_mostViewed()
-    {
-         $songs = Model_Canciones::query()->order_by('views', 'desc')->limit(10)->get();
-         
-         foreach ($songs as $key => $song) {
-            $songFormated[] = $song;
-             # code...
-         }
-
-        $json = $this->response(array(
-            'code' => 200,
-            'message' => 'Esta es la lista de canciones mas escuchadas',
-            'data' => $songFormated
-        ));
-
-        return $json;
-
-    } 
-
-    public function get_songNoListened()
-    {
-        try
-            {
-                $headers = apache_request_headers();
-                $token = $headers['Authorization'];
-                $dataJwtUser = JWT::decode($token, $this->key, array('HS256'));
-
-                $users = Model_Users::find('all', array(
-                    'where' => array(
-                        array('id', $dataJwtUser->id),
-                        array('username', $dataJwtUser->username),
-                        array('password', $dataJwtUser->password)
-               
-                    )
-                 ));
-
-            }    
-        catch (Exception $e)
-        {
-            $json = $this->response(array(
-                'code' => 500,
-                'message' => $e->getMessage(),
-                'data' => []
-            ));
-            return $json;
-               
-        }
-        $input = $_GET;
-
-        $añadir = Model_Add::find('all', array(
-                        'where' => array(
-                            array('id_list', $input['id_list']),
-
-                        )
-                     ));
-        if (empty($añadir))
-        {
-            $json = $this->response(array(
-                'code' => 500,
-                'message' => 'lista no encontada',
-                'data' => []
-            ));
-            return $json;
-
-        }
-        else
-        {
-            $lists = Model_Lists::find('all', array(
-                        'where' => array(
-                            array('id', $input['id_list']),
-                            array('id_user', $dataJwtUser->id),
-
-                        )
-                     ));
-
-            if (empty($lists))
-            {
-                $json = $this->response(array(
-                'code' => 500,
-                'message' => 'la lista no pertenece al usuario',
-                'data' => []
-            ));
-            return $json;
-
-            }
-            else
-            {
-
-                foreach ($añadir as $key => $añade) {
-                    $añadido[] = $añade;
-                    # code...
-                }
-
-                $json = $this->response(array(
-                    'code' => 200,
-                    'message' => 'Conjunto de canciones',
-                    'data' => $añadido
-                ));
-
-                return $json;
-            }
-        }
     }
 }
